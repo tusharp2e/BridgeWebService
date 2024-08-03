@@ -9,12 +9,12 @@ const providerBSC = new Web3.providers.HttpProvider(
   "https://data-seed-prebsc-1-s1.binance.org:8545/"
 );
 
-const providerPolygon = new Web3.providers.HttpProvider(
-  "https://rpc-amoy.polygon.technology"
+const providerAvalanche = new Web3.providers.HttpProvider(
+  "https://api.avax-test.network/ext/bc/C/rpc"
 );
 
 const web3BSC = new Web3(providerBSC);
-const web3Polygon = new Web3(providerPolygon);
+const web3Avalanche = new Web3(providerAvalanche);
 
 const connections = [];
 
@@ -143,7 +143,7 @@ async function connectAndSend(url, message) {
         console.log("========================================");
         axios
           .post(
-            "http://64.227.188.32:6000/api/v1/namespaces/default/apis/destinationChain/invoke/mintAndLock",
+            "http://64.227.188.32:6000/api/v1/namespaces/default/apis/destinationChain1/invoke/mintAndLock",
             {
               input: {
                 _transactionId: inputData.transactionId,
@@ -163,7 +163,7 @@ async function connectAndSend(url, message) {
       }
       if (formatedData.operation.input.methodPath == "mintAndLock") {
         const txHash = formatedData.operation.output.transactionHash;
-        const receipt = await web3Polygon.eth.getTransactionReceipt(txHash);
+        const receipt = await web3Avalanche.eth.getTransactionReceipt(txHash);
         const events = receipt.logs;
         console.log("=========Events =======================");
         console.log(events);
@@ -171,7 +171,7 @@ async function connectAndSend(url, message) {
 
         const data = events[1].data;
 
-        const eventsData = web3Polygon.eth.abi.decodeParameters(
+        const eventsData = web3Avalanche.eth.abi.decodeParameters(
           ["bytes32", "uint", "uint", "uint", "string"],
           data
         );
@@ -202,17 +202,19 @@ async function connectAndSend(url, message) {
         );
         console.log(destinationTx);
       }
+
+      console.log(formatedData.operation.input.location.address)
       // Destinaton withdraw token
       if (
         formatedData.operation.input.methodPath == "withdrawMintedToken" &&
         formatedData.operation.input.location.address ==
-          "0x25f597eb720ad8f4e2e4ea4a22f52a32f6663eae"
+          "0x263bc8023ff40bf07111649b27bbd5cc854064b1"
       ) {
         const txHash = formatedData.operation.output.transactionHash;
-        const receipt = await web3Polygon.eth.getTransactionReceipt(txHash);
+        const receipt = await web3Avalanche.eth.getTransactionReceipt(txHash);
         const events = receipt.logs;
         const data = events[0].data;
-        const eventsData = web3Polygon.eth.abi.decodeParameters(
+        const eventsData = web3Avalanche.eth.abi.decodeParameters(
           ["bytes32", "address", "uint", "uint"],
           data
         );
@@ -232,7 +234,7 @@ async function connectAndSend(url, message) {
         if (destinationTx.status == "withdrawalReady") {
           axios
             .post(
-              "http://64.227.188.32:6000/api/v1/namespaces/default/apis/destinationChain/invoke/withdrawMintedTokenResponse",
+              "http://64.227.188.32:6000/api/v1/namespaces/default/apis/destinationChain1/invoke/withdrawMintedTokenResponse",
               {
                 input: {
                   _transactionId: transactionId,
@@ -258,13 +260,13 @@ async function connectAndSend(url, message) {
         formatedData.operation.input.methodPath ==
           "withdrawMintedTokenResponse" &&
         formatedData.operation.input.location.address ==
-          "0x25f597eb720ad8f4e2e4ea4a22f52a32f6663eae"
+          "0x263bc8023ff40bf07111649b27bbd5cc854064b1"
       ) {
         const txHash = formatedData.operation.output.transactionHash;
-        const receipt = await web3Polygon.eth.getTransactionReceipt(txHash);
+        const receipt = await web3Avalanche.eth.getTransactionReceipt(txHash);
         const events = receipt.logs;
         const data = events[1].data;
-        const eventsData = web3Polygon.eth.abi.decodeParameters(
+        const eventsData = web3Avalanche.eth.abi.decodeParameters(
           ["bytes32", "address", "address", "uint", "uint"],
           data
         );
@@ -309,7 +311,7 @@ const server2 = {
   url: "ws://64.227.188.32:6000/ws",
   message: {
     type: "start",
-    name: "destinationChainGeneral5",
+    name: "destinationChainGeneral1",
     namespace: "default",
     autoack: true,
   },
